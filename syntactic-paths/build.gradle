@@ -28,9 +28,19 @@ jmh {
     resultFormat = 'JSON'
 }
 
+// https://github.com/melix/jmh-gradle-plugin/issues/248
 tasks.jmhCompileGeneratedClasses {
-    options.annotationProcessorPath = configurations.errorprone
-    options.errorprone.enabled = true
+    options.annotationProcessorPath = configurations.jmhAnnotationProcessor
+}
+
+plugins.withId("net.ltgt.errorprone") {
+    tasks.jmhCompileGeneratedClasses {
+        options.errorprone {
+            enabled = true
+            // JMH generates duplicate field names like byte p000, p001, p002
+            disable("HidingField")
+        }
+    }
 }
 
 def resultsDir(Project project) {
